@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Component } from "react";
 import "./style.css";
 
 interface Message {
@@ -14,18 +14,34 @@ interface Message {
 
 interface MessageListingProps {
   messages: Message[];
+  ifEmail?: Boolean;
 }
 
-const MessageListing: React.FC<MessageListingProps> = ({ messages: initialMessages }) => {
+interface MessageListingState {
+  messages: Message[];
+  subject: string;
+  lastMessage: string;
+  cc: string;
+  bcc: string;
+}
 
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
-  console.log(messages, "messages")
-  const [subject, setSubject] = useState<string>("");
-  const [lastMessage, setLastMessage] = useState<string>("");
-  const [cc, setCc] = useState<string>("");
-  const [bcc, setBcc] = useState<string>("");
+class MessageListing extends Component<MessageListingProps, MessageListingState> {
+  constructor(props: MessageListingProps) {
+    super(props);
 
-  const handleSend = () => {
+    // Initialize state from props
+    this.state = {
+      messages: props.messages,
+      subject: "",
+      lastMessage: "",
+      cc: "",
+      bcc: ""
+    };
+  }
+
+  handleSend = () => {
+    const { messages, lastMessage, subject, cc, bcc } = this.state;
+
     if (!lastMessage.trim()) return; // Don't send empty messages
 
     // Create a new message
@@ -40,7 +56,9 @@ const MessageListing: React.FC<MessageListingProps> = ({ messages: initialMessag
     };
 
     // Add the new message to the list
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    this.setState((prevState) => ({
+      messages: [...prevState.messages, newMessage]
+    }));
 
     // Add a default reply
     const defaultReply: Message = {
@@ -50,76 +68,87 @@ const MessageListing: React.FC<MessageListingProps> = ({ messages: initialMessag
       timestamp: new Date().toLocaleTimeString(),
     };
 
-    setMessages((prevMessages) => [...prevMessages, defaultReply]);
+    this.setState((prevState) => ({
+      messages: [...prevState.messages, defaultReply]
+    }));
 
     // Clear the form
-    setSubject("");
-    setLastMessage("");
-    setCc("");
-    setBcc("");
+    this.setState({
+      subject: "",
+      lastMessage: "",
+      cc: "",
+      bcc: ""
+    });
   };
 
-  return (
-    <div className="message-listing-container">
-      <h2 className="header">Messages</h2>
+  render() {
+    const { messages, subject, lastMessage, cc, bcc } = this.state;
+    const { ifEmail } = this.props;
+    console.log(ifEmail, "ifEmail")
+    return (
+      <div className="message-listing-container">
+        <h2 className="header">Messages</h2>
 
-      {/* Compose Message Form */}
-     
-      {/* Message List */}
-      <div className="message-list">
-        {messages.map((msg) => (
-          <div key={msg.id} className="message-item">
-            <img
-              src={msg.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${msg.name}`}
-              alt={msg.name}
-              className="avatar"
-            />
-            <div className="message-info">
-              <h3 className="message-name">{msg.name}</h3>
-              {msg.subject && <p className="message-subject">Subject: {msg.subject}</p>}
-              <p className="message-text">{msg.lastMessage}</p>
-              {msg.cc && <p className="message-cc">CC: {msg.cc.join(", ")}</p>}
-              {msg.bcc && <p className="message-bcc">BCC: {msg.bcc.join(", ")}</p>}
+        {/* Message List */}
+        <div className="message-list">
+          {messages.map((msg) => (
+            <div key={msg.id} className="message-item">
+              <img
+                src={msg.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${msg.name}`}
+                alt={msg.name}
+                className="avatar"
+              />
+              <div className="message-info">
+                <h3 className="message-name">{msg.name}</h3>
+                {msg.subject && <p className="message-subject">Subject: {msg.subject}</p>}
+                <p className="message-text">{msg.lastMessage}</p>
+                {msg.cc && <p className="message-cc">CC: {msg.cc.join(", ")}</p>}
+                {ifEmail && msg.bcc && <p className="message-bcc">BCC: {msg.bcc.join(", ")}</p>}
+              </div>
+              <span className="timestamp">{msg.timestamp}</span>
             </div>
-            <span className="timestamp">{msg.timestamp}</span>
-          </div>
-        ))}
-      </div>
-      <div className="compose-form">
-        <input
-          type="text"
-          placeholder="Subject"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          className="compose-input"
-        />
-        <textarea
-          placeholder="Type your message..."
-          value={lastMessage}
-          onChange={(e) => setLastMessage(e.target.value)}
-          className="compose-textarea"
-        />
-        <input
-          type="text"
-          placeholder="CC (comma-separated emails)"
-          value={cc}
-          onChange={(e) => setCc(e.target.value)}
-          className="compose-input"
-        />
-        <input
-          type="text"
-          placeholder="BCC (comma-separated emails)"
-          value={bcc}
-          onChange={(e) => setBcc(e.target.value)}
-          className="compose-input"
-        />
-        <button onClick={handleSend} className="send-button">
-          Send
-        </button>
-      </div>
+          ))}
+        </div>
 
-    </div>
-  );
-};
+        {/* Compose Message Form */}
+        <div className="compose-form">
+        {ifEmail &&
+            <input
+              type="text"
+              placeholder="TO (comma-separated emails)"
+              value={cc}
+              onChange={(e) => this.setState({ cc: e.target.value })}
+              className="compose-input"
+            />}
+          {ifEmail &&
+            <input
+              type="text"
+              placeholder="CC (comma-separated emails)"
+              value={bcc}
+              onChange={(e) => this.setState({ bcc: e.target.value })}
+              className="compose-input"
+            />}
+          <input
+            type="text"
+            placeholder="Subject"
+            value={subject}
+            onChange={(e) => this.setState({ subject: e.target.value })}
+            className="compose-input"
+          />
+          <textarea
+            placeholder="Type your message..."
+            value={lastMessage}
+            onChange={(e) => this.setState({ lastMessage: e.target.value })}
+            className="compose-textarea"
+          />
+       
+          <button onClick={this.handleSend} className="send-button">
+            Send
+          </button>
+        </div>
+      </div>
+    );
+  }
+}
 
 export default MessageListing;

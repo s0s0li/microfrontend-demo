@@ -25,7 +25,7 @@ const prodConfig: ModuleFederationConfig = {
    * ]
    */
   remotes: [
-    ['chat', 'http://localhost:4201/'],
+    ['chat', 'http://localhost:4201/remoteEntry.ts'],
     ['email', 'http://localhost:4202/remoteEntry.ts'],
   ],
 };
