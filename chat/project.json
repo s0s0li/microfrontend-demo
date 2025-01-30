@@ -1,0 +1,82 @@
+{
+  "name": "chat",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "chat/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "babel",
+        "outputPath": "dist/chat",
+        "index": "chat/src/index.html",
+        "baseHref": "/",
+        "main": "chat/src/main.ts",
+        "tsConfig": "chat/tsconfig.app.json",
+        "assets": ["chat/src/favicon.ico", "chat/src/assets"],
+        "styles": ["chat/src/styles.css"],
+        "scripts": [],
+        "webpackConfig": "chat/webpack.config.ts"
+      },
+      "configurations": {
+        "development": {
+          "extractLicenses": false,
+          "optimization": false,
+          "sourceMap": true,
+          "vendorChunk": true
+        },
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "chat/src/environments/environment.ts",
+              "with": "chat/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false,
+          "webpackConfig": "chat/webpack.config.prod.ts"
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/react:module-federation-dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "chat:build",
+        "hmr": true,
+        "port": 4201
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "chat:build:development"
+        },
+        "production": {
+          "buildTarget": "chat:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "serve-static": {
+      "executor": "@nx/react:module-federation-static-server",
+      "defaultConfiguration": "production",
+      "options": {
+        "serveTarget": "chat:serve"
+      },
+      "configurations": {
+        "development": {
+          "serveTarget": "chat:serve:development"
+        },
+        "production": {
+          "serveTarget": "chat:serve:production"
+        }
+      }
+    }
+  }
+}
