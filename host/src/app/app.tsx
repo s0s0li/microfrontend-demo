@@ -10,28 +10,30 @@ const Email = React.lazy(() => import('email/Module'));
 export function App() {
   return (
     <React.Suspense fallback={null}>
-      {/* Navigation Bar */}
-      <nav className={styles.nav}>
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/chat">Chat</Link>
-          </li>
-          <li>
-            <Link to="/email">Email</Link>
-          </li>
-        </ul>
-      </nav>
+      <div className={styles.appContainer}>
+        {/* Navigation Bar */}
+        <nav className={styles.nav}>
+          <ul>
+            <li>
+              <Link to="/">Home</Link>
+            </li>
+            <li>
+              <Link to="/chat">Chat</Link>
+            </li>
+            <li>
+              <Link to="/email">Email</Link>
+            </li>
+          </ul>
+        </nav>
 
-      {/* Routes */}
-      <Routes>
-        <Route path="/" element={<NxWelcome title="host" />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/email" element={<Email />} />
-      </Routes>
-      <Footer />
+        {/* Routes */}
+        <Routes>
+          <Route path="/" element={<NxWelcome title="host" />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/email" element={<Email />} />
+        </Routes>
+        <Footer />
+      </div>
     </React.Suspense>
   );
 }
